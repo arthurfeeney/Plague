@@ -15,8 +15,9 @@ class URLFinder():
         return offset
 
     def find_href(self, html, front):
-        # looks for 'href' in the html stirng. For the first found
-        # occurence, it returns the index of the h.
+        # another weird automata thing that looks for 'href' in the
+        # html stirng. For the first found occurence, it returns
+        # the index of the h.
         idx = front
         while idx < len(html) - len('href') + 1:
             word_len = 0
@@ -34,6 +35,12 @@ class URLFinder():
         # no href found
         return -1
 
+    def find_quote(self, html, front):
+        idx = front
+        while idx < len(html) and html[idx] != '"' and html[idx] != '\'':
+            idx += 1
+        return idx if idx < len(html) else -1
+
     def find_url(self, html, front):
         # return the start and end index of url.
         h_index = self.find_href(html, front)
@@ -41,15 +48,13 @@ class URLFinder():
         if h_index == -1:
             return -1, -1
 
-        start = h_index + html[h_index:].find('"')
+        start = self.find_quote(html, front)
 
         # find failed to find anything, so it returns - 1
         if start == h_index - 1:
             return -1, -1
 
-        end = start + 1
-        while end < len(html) and html[end] != '"':
-            end += 1
+        end = self.find_quote(html, start + 1)
 
         # did not find a closing quote
         if end == len(html):
@@ -86,23 +91,62 @@ class URLFinder():
                 idx += 1
         return urls
 
-    def urls(self, html):
+    def urls(self, html, current_url):
         # abstract function implemented in derived class.
         raise NotImplementedError('URLFinder.find_urls not implemented.')
 
 
 #
-# Derived class that only finds Absolute urls.
+# Derived class that only finds the Absolute urls.
 #
 class AbsoluteURLFinder(URLFinder):
     def __init__(self):
         super(AbsoluteURLFinder, self).__init__()
 
-    def unique_absolute(self, urls):
+    def __unique_absolute(self, urls):
         absolute = ([
             url for url in urls if 'https://' in url or 'http://' in url
         ])
         return list(set(absolute))
 
-    def urls(self, html):
-        return self.unique_absolute(self.find_urls(html))
+    def urls(self, html, current_url):
+        # current_url is not needed for this class. For modularity, it
+        # needs to be passed in anyway.
+        return self.__unique_absolute(self.find_urls(html))
+
+
+#
+# TotalURLFinder tries to get absolute and some of the relative urls.
+#
+class RelativeURLFinder(URLFinder):
+    def __init__(self):
+        super(RelativeURLFinder, self).__init__()
+
+    def domain_name(self, absolute_url):
+        # takes an absolute url, such as https://youtube.com/hithere
+        # and returns https://youtube.com
+        if 'https://' in absolute_url:
+            end = absolute_url[len('https://'):].find('/')
+            if end == -1:
+                return absolute_url
+            return absolute_url[:end + len('https://')]
+        elif 'http://' in absolute_url:
+            end = absolute_url[len('http://'):].find('/')
+            if end == -1:
+                return absolute_url
+            return absolute_url[:end + len('http://')]
+        else:
+            return None
+
+    def urls(self, html, current_url):
+        current_domain = self.domain_name(current_url)
+        if current_domain is None:
+            raise Exception('RelativeURLFinder.urls current_domain is None')
+        dirty_urls = self.find_urls(html)
+        abs_urls = []
+        for url in dirty_urls:
+            if 'https://' in url or 'http://' in url:
+                abs_urls.append(url)
+            elif len(url) > 0 and url[0] == '/':
+                abs_urls.append(current_domain + url)
+        return list(set(abs_urls))

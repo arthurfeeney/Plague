@@ -1,5 +1,5 @@
 import pytest
-from automata import URLFinder
+from automata import URLFinder, RelativeURLFinder
 
 
 def test_next_char():
@@ -33,6 +33,19 @@ def test_find_href():
     assert a.find_href('href="hi"', 0) == 0
 
 
+def test_find_quote():
+    a = URLFinder()
+    assert a.find_quote('hi" there', 0) == 2
+    assert a.find_quote('hi" there', 4) == -1
+    assert a.find_quote('hi\' there', 0) == 2
+    assert a.find_quote('" yo', 0) == 0
+    assert a.find_quote('" yo', 1) == -1
+    assert a.find_quote('poop "', 1) == 5
+    assert a.find_quote('"', 0) == 0
+    assert a.find_quote('"', 1) == -1
+    assert a.find_quote('"', 10) == -1
+
+
 def test_find_url():
     a = URLFinder()
     assert a.find_url('href="hi"', 0) == (6, 7)
@@ -55,3 +68,17 @@ def test_automata():
                        '<a href="swag"> </a> sfasdf'
                        'the time? <a qwop href="ninja"'
                        'it is 11>') == ['yolo', 'swag', 'ninja']
+
+    assert a.find_urls("<a href='yolo'> </a>"
+                       "<a href='swag'> </a> sfasdf"
+                       "the time? <a qwop href='ninja'"
+                       "it is 11>") == ['yolo', 'swag', 'ninja']
+
+
+def test_domain_name():
+    a = RelativeURLFinder()
+    assert a.domain_name('https://youtube.com') == 'https://youtube.com'
+    assert (
+        a.domain_name('http://x.y.z.com/hithere/yolo') == 'http://x.y.z.com')
+    assert (a.domain_name('htt://yolo.com') == None)
+    assert a.domain_name('https://') == 'https://'

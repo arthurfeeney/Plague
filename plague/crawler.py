@@ -4,7 +4,7 @@ class Crawler(object):
         self.seed_url = seed_url
         self.url_finder = url_finder
         self.frontier = frontier
-        self.frontier.add(self.seed_url)  # start with the seed url
+        self.frontier.add_many(self.seed_url)  # start with the seed url
         self.ust = ust
 
     def view_frontier(self):
@@ -20,8 +20,9 @@ class Crawler(object):
 
     def crawl(self):
         current_url = self.frontier.get()
+
         html = self.__html_str(current_url)
-        new_urls = self.url_finder.urls(html)
+        new_urls = self.url_finder.urls(html, current_url)
 
         # insert new urls that have not been seen to the frontier
         for url in new_urls:

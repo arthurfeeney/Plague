@@ -1,3 +1,6 @@
+#
+# Abstact UST URL-Seen-Test.
+#
 class UST(object):
     def __init__(self):
         pass
@@ -12,10 +15,16 @@ class UST(object):
         raise NotImplementedError('UST.__contains__ not implemented')
 
     def contains(self, item):
-        # should just be a more explicit version of __contains__
+        # just be a more explicit version of __contains__
         raise NotImplementedError('UST.contains not implemented')
 
 
+#
+# set has constant insertion and lookup. So it works well for this.
+# There are other UST types, such as a bloom filter, that I may use in the
+# future. Everything should be somewhat modular, so this is basically a
+# wrapper for set.
+#
 class SetUST(UST):
     def __init__(self):
         super(SetUST, self).__init__()

@@ -15,6 +15,10 @@ class Frontier(object):
     def add(self, url):
         raise NotImplementedError('Fronter.add not implemented')
 
+    def add_many(self, urls):
+        for url in urls:
+            self.add(url)
+
     def get(self):
         raise NotImplementedError('Fronter.get not implemented')
 
