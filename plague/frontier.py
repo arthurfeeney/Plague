@@ -24,7 +24,7 @@ class Frontier(object):
 
 
 #
-# Simple FIFO Queue.
+# Simple FIFO Queue. Very impolite.
 #
 class FIFOFrontier(Frontier):
     def __init__(self):

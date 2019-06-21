@@ -67,7 +67,7 @@ class BloomFilter(UST):
             for i in np.arange(self.hash_count)
         ]
         self.cells[indices] = 1
-        self.num_entries += self.hash_count
+        self.num_entries += 1
 
     def __contains__(self, item):
         # checks if item is probably contained.
