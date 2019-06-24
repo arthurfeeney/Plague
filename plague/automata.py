@@ -1,5 +1,5 @@
 #
-# abstract base class
+# abstract base class for finding urls
 #
 class URLFinder():
     def __init__(self):
@@ -19,7 +19,7 @@ class URLFinder():
         # html stirng. For the first found occurence, it returns
         # the index of the h.
         idx = front
-        while idx < len(html) - len('href') + 1:
+        while idx < len(html) - len('href') + 1 and html[idx] != '>':
             word_len = 0
             if html[idx + word_len] == 'h':
                 word_len += 1
@@ -38,8 +38,12 @@ class URLFinder():
     def find_quote(self, html, front):
         idx = front
         while idx < len(html) and html[idx] != '"' and html[idx] != '\'':
+            if html[idx] == '>':
+                # if it reachers a > before a quote, then it is probably
+                # poorly written html.
+                return -1
             idx += 1
-        return idx if idx < len(html) else -1
+        return idx if idx <= len(html) else -1
 
     def find_url(self, html, front):
         # return the start and end index of url.
@@ -77,14 +81,16 @@ class URLFinder():
                 if html[idx + word_len] == 'a':
                     f_url, b_url = self.find_url(html, idx + word_len)
 
-                    if (f_url, b_url) == (-1, -1):
-                        raise Exception('automate failed to find closing'
-                                        'quote for url starting at {}'\
-                                        .format(idx + word_len))
+                    if (f_url, b_url) != (-1, -1):
+                        #raise Exception('automata failed to find closing'
+                        #                'quote for url starting at {}'\
+                        #                .format(idx + word_len))
 
-                    # adding +1 to f_url removes quotes ""
-                    urls.append(html[f_url:b_url + 1])
-                    idx = b_url + 1
+                        # adding +1 to f_url removes quotes ""
+                        urls.append(html[f_url:b_url + 1])
+                        idx = b_url + 1
+                    else:
+                        idx += 1
                 else:
                     idx += word_len
             else:
@@ -145,8 +151,9 @@ class RelativeURLFinder(URLFinder):
         dirty_urls = self.find_urls(html)
         abs_urls = []
         for url in dirty_urls:
-            if len(url) > 7 and ('https://' in url or 'http://' in url):
-                abs_urls.append(url)
-            elif len(url) > 0 and url[0] == '/':
-                abs_urls.append(current_domain + url)
+            if not '.' in url[-4:]:
+                if len(url) > 7 and ('https://' in url or 'http://' in url):
+                    abs_urls.append(url)
+                elif len(url) > 0 and url[0] == '/':
+                    abs_urls.append(current_domain + url)
         return list(set(abs_urls))

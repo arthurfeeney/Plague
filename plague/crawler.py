@@ -18,13 +18,33 @@ class Crawler(object):
         html = r.data.decode('utf-8')
         return html
 
+    def __get_page(self):
+        url = self.frontier.get()
+        #html = self.__html_str(current_url.strip())
+        try:
+            r = self.http.request('GET', url)
+        except:
+            return self.__get_page()
+        #html = r.data.decode('utf-8')
+        while r.status != 200:
+            url = self.frontier.get()
+            try:
+                r = self.http.request('GET', url)
+            except:
+                return self.__get_page()
+        try:
+            html = r.data.decode('utf-8')
+        except:
+            return self.__get_page()
+        return html, url
+
     def __remove_slash(self, url):
         return url.replace('/', '_^_')
 
     def crawl(self, download_path=None, graph=None):
-        current_url = self.frontier.get()
-        print(current_url)
-        html = self.__html_str(current_url)
+        #current_url = self.frontier.get()
+        html, current_url = self.__get_page(
+        )  #self.__html_str(current_url.strip())
 
         if download_path:
             # don't want / in file name

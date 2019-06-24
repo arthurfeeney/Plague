@@ -13,13 +13,13 @@ def main():
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
                                ca_certs=certifi.where())
     A = RelativeURLFinder()
-    f = DomainPriorityFrontier(limit=20)  #FIFOFrontier()
+    f = DomainPriorityFrontier(limit=200)  #FIFOFrontier()
     ust = BloomFilter(.1, 10000)  #SetUST()
     c = crawler.Crawler(http, url, A, f, ust)
 
     G = nx.Graph()
 
-    for i in range(30):
+    for i in range(60):
         c.crawl(download_path=None, graph=G)
     #for url in c.view_frontier():
     #    print(url)
