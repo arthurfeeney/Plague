@@ -23,6 +23,7 @@ class Crawler(object):
 
     def crawl(self, download_path=None, graph=None):
         current_url = self.frontier.get()
+        print(current_url)
         html = self.__html_str(current_url)
 
         if download_path:

@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+
 from ust import BloomFilter
 import pytest
 import string
@@ -41,13 +44,9 @@ def compare_prob(size):
     found = 0
     for i in range(test_size):
         word = gen(N)
-        found += 1 if word in b else 0
+        found += word in b
     # fraction of false positives should be around 0.5
     assert found / test_size == pytest.approx(0.5, abs=.1)
-
-
-def test_small_bloom():
-    compare_prob(10)
 
 
 def test_larger_bloom():

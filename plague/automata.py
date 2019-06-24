@@ -141,11 +141,11 @@ class RelativeURLFinder(URLFinder):
     def urls(self, html, current_url):
         current_domain = self.domain_name(current_url)
         if current_domain is None:
-            raise Exception('RelativeURLFinder.urls current_domain is None')
+            raise Exception('RelativeURLFinder.urls: current_domain is None')
         dirty_urls = self.find_urls(html)
         abs_urls = []
         for url in dirty_urls:
-            if 'https://' in url or 'http://' in url:
+            if len(url) > 7 and ('https://' in url or 'http://' in url):
                 abs_urls.append(url)
             elif len(url) > 0 and url[0] == '/':
                 abs_urls.append(current_domain + url)
