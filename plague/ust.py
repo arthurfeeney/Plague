@@ -113,5 +113,45 @@ class SimpleDiskUST(UST):
 
 
 class DiskBloomFilter(UST):
-    def __init__(self, prob, n_to_insert):
-        pass
+    def __init__(self, prob, n_to_insert, path, name):
+        self.path = path
+        self.name = name
+        self.prob = prob  # probability of a FALSE positive.
+        self.n = n_to_insert
+        self.num_cells = int(-(self.n * np.log(prob)) / (np.log(2)**2))
+        self.hash_count = int(np.ceil(-np.log2(prob)))
+        self.num_entries = 0
+
+        # fill file with n_to_insert 0's
+        with open(path + name, 'wb+') as f:
+            for i in range(self.num_cells + 1):
+                f.write('0'.encode())
+            print(f.read())
+
+    def add(self, item):
+        indices = [
+            mmh3.hash(item, i) % self.num_cells
+            for i in np.arange(self.hash_count)
+        ]
+        with open(self.path + self.name, 'rb+') as f:
+            for idx in indices:
+                f.seek(idx)
+                f.write('1'.encode())
+            self.num_entries += 1
+
+    def __contains__(self, item):
+        indices = [
+            mmh3.hash(item, i) % self.num_cells
+            for i in np.arange(self.hash_count)
+        ]
+        with open(self.path + self.name, 'rb') as f:
+            print(f.read())
+            for idx in indices:
+                f.seek(idx)
+                x = f.read(1)
+                if x == '0'.encode():
+                    return False
+            return True
+
+    def contains(self, item):
+        return self.__contains__(item)

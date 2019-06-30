@@ -48,7 +48,9 @@ class FIFOFrontier(Frontier):
 
 
 #
-# Simple Priority Queue. A bit more polite than fifo.
+# Priority Queue based Frontier. A bit more polite than fifo.
+# Keeps limit domains. Prioritizes new domains, domains not seen in a while,
+# then recently seen domains
 #
 class DomainPriorityFrontier(Frontier):
     def __init__(self, limit=None):
