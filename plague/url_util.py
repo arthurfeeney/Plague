@@ -18,3 +18,11 @@ def domain_name(absolute_url):
         return absolute_url[:end + len('http://')]
     else:
         return None
+
+
+def remove_protocol(url):
+    if 'https://' in url[:len('https://')]:
+        url = url[len('https://'):]
+    elif 'http://' in url[:len('http://')]:
+        url = url[len('http://'):]
+    return url

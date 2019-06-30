@@ -1,5 +1,6 @@
 import mmh3  # murmer hash used by bloom filter
 import numpy as np
+import csv
 
 
 #
@@ -81,3 +82,36 @@ class BloomFilter(UST):
 
     def contains(self, item):
         return self.__contains__(item)
+
+
+#
+# A VERY simple and inefficient disk-based ust.
+#
+class SimpleDiskUST(UST):
+    def __init__(self, path, name='simple_disk_ust'):
+        self.path = path
+        self.name = name
+        f = open(self.path + self.name, 'w+')
+        f.close()
+
+    def add(self, item):
+        assert isinstance(item, str), 'SimpleDiskUST.add item must be str'
+        f = open(self.path + self.name, 'w+')
+        f.write(item + ',')
+        f.close()
+
+    def __contains__(self, item):
+        with open(self.path + self.name, 'r+') as f:
+            reader = csv.reader(f, delimiter=',')
+            for s in reader:
+                if item == s:
+                    return True
+            return False
+
+    def contains(self, item):
+        return self.__contains__(item)
+
+
+class DiskBloomFilter(UST):
+    def __init__(self, prob, n_to_insert):
+        pass

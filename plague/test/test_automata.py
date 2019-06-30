@@ -58,6 +58,13 @@ def test_find_url():
     assert a.find_url('href="ab" href="b"', 0) == (6, 7)
     assert a.find_url('href="ab" href="b"', 9) == (16, 16)
     assert 'href="ab" href="b"' [15 + 1:17] == 'b'
+    # lots of malformed things
+    assert a.find_url('href="abcd>"', 0) == (-1, -1)
+    assert a.find_url('="abcd>"', 0) == (-1, -1)
+    assert a.find_url('="abcd', 0) == (-1, -1)
+    assert a.find_url('href="abcd', 0) == (-1, -1)
+    assert a.find_url('href=abcd">', 0) == (-1, -1)
+    assert a.find_url('href=abcd"', 0) == (-1, -1)
 
 
 def test_automata():
@@ -76,12 +83,3 @@ def test_automata():
                        "<a href='swag'> </a> sfasdf"
                        "the time? <a qwop href='ninja'"
                        "it is 11>") == ['yolo', 'swag', 'ninja']
-
-
-def test_domain_name():
-    a = RelativeURLFinder()
-    assert a.domain_name('https://youtube.com') == 'https://youtube.com'
-    assert (
-        a.domain_name('http://x.y.z.com/hithere/yolo') == 'http://x.y.z.com')
-    assert (a.domain_name('htt://yolo.com') == None)
-    assert a.domain_name('https://') == 'https://'
