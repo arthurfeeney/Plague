@@ -24,6 +24,7 @@ class Crawler(object):
 
     def crawl(self, download_path=None, graph=None):
         html, current_url = self.__get_page()
+        print(current_url)
 
         if download_path:
             self.__download_page(download_path, current_url, html)
@@ -44,7 +45,7 @@ class Crawler(object):
         #url = self.__dns_lookup(url)
         try:
             # attempt connecting, downloading, and decoding the page
-            r = self.http.request('GET', url)
+            r = self.http.request('GET', url, timeout=2.5)
             if r.status != 200:
                 # if the site didn't respond successfully, try the next page.
                 return self.__get_page()

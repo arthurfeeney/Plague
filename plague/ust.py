@@ -126,7 +126,6 @@ class DiskBloomFilter(UST):
         with open(path + name, 'wb+') as f:
             for i in range(self.num_cells + 1):
                 f.write('0'.encode())
-            print(f.read())
 
     def add(self, item):
         indices = [
@@ -145,7 +144,6 @@ class DiskBloomFilter(UST):
             for i in np.arange(self.hash_count)
         ]
         with open(self.path + self.name, 'rb') as f:
-            print(f.read())
             for idx in indices:
                 f.seek(idx)
                 x = f.read(1)

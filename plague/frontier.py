@@ -1,5 +1,6 @@
 from heapq import *
 import queue
+import queuelib
 import plague.url_util as uu
 import time
 
@@ -47,19 +48,44 @@ class FIFOFrontier(Frontier):
         return self.q.get()
 
 
+class DomainPriorityFrontier:
+    def dpf_reset(self):
+        # domain -> time
+        # keeps track of the last time the domain was popped.
+        self.last_pulled = {}
+
+    def check_time(self, domain):
+        time_pulled = time.time()
+
+        if domain in self.last_pulled:
+            # large negative if it has not been seen in a while.
+            # small negative if it has been seen recently :)
+            priority = self.last_pulled[domain] - time_pulled
+
+        else:
+            # if the domain is totally new, give it great priority.
+            priority = -time_pulled
+
+        # update the last time pulled to now
+        self.last_pulled[domain] = time_pulled
+
+        return priority
+
+
 #
 # Priority Queue based Frontier. A bit more polite than fifo.
 # Keeps limit domains. Prioritizes new domains, domains not seen in a while,
 # then recently seen domains
 #
-class DomainPriorityFrontier(Frontier):
+class MemoryDomainPriorityFrontier(Frontier, DomainPriorityFrontier):
     def __init__(self, limit=None):
+        # init the DomainPriorityFrontier
+        self.dpf_reset()
+
         self.q = []
 
-        # domain -> time
-        # keeps track of the last time the domain was popped.
-        self.last_pulled = {}
-
+        # option to store a finite number of elements since this structure
+        # is in memory.
         # max number of things stored in last_pulled.
         # If it is None, there is no limit.
         self.limit = limit
@@ -87,19 +113,7 @@ class DomainPriorityFrontier(Frontier):
             for key in oldest_keys:
                 del self.last_pulled[key]
 
-        time_pulled = time.time()
-
-        if domain in self.last_pulled:
-            # large negative if it has not been seen in a while.
-            # small negative if it has been seen recently :)
-            priority = self.last_pulled[domain] - time_pulled
-
-        else:
-            # if the domain is totally new, give it great priority.
-            priority = -time_pulled
-
-        # update the last time pulled to now
-        self.last_pulled[domain] = time_pulled
+        priority = self.check_time(domain)
 
         # push the url on the heap, not the domain
         heappush(self.q, (priority, url))

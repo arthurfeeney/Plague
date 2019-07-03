@@ -23,7 +23,7 @@ def test_fifo_frontier():
 
 def test_k_oldest():
     # test for DomainPriorityFrontier.__k_oldest
-    f = DomainPriorityFrontier()
+    f = MemoryDomainPriorityFrontier()
 
     urls = [
         'https://hi.com/two', 'http://there.com/xyz', 'https://ninja.com/abc'
@@ -36,7 +36,7 @@ def test_k_oldest():
 
 
 def test_dp_frontier_limit():
-    f = DomainPriorityFrontier(limit=2)
+    f = MemoryDomainPriorityFrontier(limit=2)
     urls = [
         'https://hi.com/two', 'http://there.com/xyz', 'https://ninja.com/abc'
     ]
