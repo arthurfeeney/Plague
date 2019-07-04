@@ -1,6 +1,7 @@
 
 ### Plague Stuff ###
 **/html_downloads
+*.dat
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

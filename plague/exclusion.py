@@ -1,5 +1,5 @@
 from urllib.robotparser import RobotFileParser
-import url_util as uu
+import plague.url_util as uu
 import re
 
 
@@ -12,7 +12,10 @@ class Exclusion(object):
         self.robot_cache = {}
         self.rp = RobotFileParser()
 
+    # Broken? disallows anything in the robots.txt.
+    # Even if it is marked with Allow:
     def test_url(self, url):
+        self.rp = RobotFileParser()
         robot_url = uu.domain_name(url) + '/robots.txt'
         self.rp.set_url(robot_url)
         self.rp.read()

@@ -3,14 +3,16 @@ import plague.url_util as uu
 
 
 class Crawler(object):
-    def __init__(self, http, seed_url, url_finder, frontier, ust):
+    def __init__(self, http, seed_url, url_finder, frontier, ust, exclusion):
         self.http = http
         self.seed_url = seed_url
         self.url_finder = url_finder
         self.frontier = frontier
         self.frontier.add_many(self.seed_url)  # start with the seed url
         self.ust = ust
+        self.exclusion = exclusion
         self.dns_cache = {}  # domain name -> ip-address
+        self.num_url_crawled = 0
 
     def view_frontier(self):
         return self.frontier.view_frontier()
@@ -18,13 +20,22 @@ class Crawler(object):
     def view_ust(self):
         return self.ust.view()
 
-    def crawl_count_sites(self, count, download_path=None, graph=None):
+    def crawl_count_sites(self,
+                          count,
+                          download_path=None,
+                          graph=None,
+                          verbose=True):
         for i in range(count):
-            self.crawl(download_path, graph)
+            self.crawl(count, download_path, graph, verbose)
 
-    def crawl(self, download_path=None, graph=None):
+    def crawl(self, count, download_path=None, graph=None, verbose=True):
         html, current_url = self.__get_page()
-        print(current_url)
+        self.num_url_crawled += 1
+        if verbose:
+            print('count: {num}/{denom}\t'
+                  'site: {site}\t'.format(num=self.num_url_crawled,
+                                          denom=count,
+                                          site=current_url))
 
         if download_path:
             self.__download_page(download_path, current_url, html)
@@ -34,9 +45,12 @@ class Crawler(object):
         if graph is not None:
             graph.add_edges_from([(current_url, other) for other in new_urls])
 
+        self.add_new_urls(new_urls)
+
+    def add_new_urls(self, new_urls):
         # insert new urls that have not been seen to the frontier
         for url in new_urls:
-            if not url in self.ust:
+            if not url in self.ust:  #and self.exclusion.test_url(url):
                 self.frontier.add(url)
                 self.ust.add(url)
 
