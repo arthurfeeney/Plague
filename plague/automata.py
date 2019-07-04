@@ -14,8 +14,8 @@ class URLFinder():
 
     def find_urls(self, html):
         # automata-ish thing that looks for all <a ... href=...
-        # (I don't think this is regular, so not really an FSA)
         # in the input html string
+        # This seems pretty linear.
         urls = []
 
         idx = 0
@@ -30,7 +30,7 @@ class URLFinder():
                         urls.append(html[f_url:b_url + 1])
                         idx = b_url + 1
                     else:
-                        idx += 1
+                        idx += word_len
                 else:
                     idx += word_len
             else:

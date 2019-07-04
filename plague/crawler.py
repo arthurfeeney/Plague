@@ -32,10 +32,9 @@ class Crawler(object):
         html, current_url = self.__get_page()
         self.num_url_crawled += 1
         if verbose:
-            print('count: {num}/{denom}\t'
-                  'site: {site}\t'.format(num=self.num_url_crawled,
-                                          denom=count,
-                                          site=current_url))
+            self.__verbose_output(num=self.num_url_crawled,
+                                  denom=count,
+                                  site=current_url[:60])
 
         if download_path:
             self.__download_page(download_path, current_url, html)
@@ -53,6 +52,9 @@ class Crawler(object):
             if not url in self.ust:  #and self.exclusion.test_url(url):
                 self.frontier.add(url)
                 self.ust.add(url)
+
+    def __verbose_output(self, **kwargs):
+        print('Count: {num}/{denom}\t' 'Site: {site}\t'.format(**kwargs))
 
     def __get_page(self):
         url = self.frontier.get()

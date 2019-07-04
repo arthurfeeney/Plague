@@ -60,6 +60,17 @@ class PriorityFunctor:
     def __call__(self, domain):
         raise NotImplementedError('Frontier.__call__ not implemented')
 
+    def num_pulled(self):
+        return len(self.last_pulled)
+
+    def k_oldest(self, k):
+        # the oldest keys will have the earliest time pulled. So
+        # sort and get the first k elements.
+        oldest = sorted(self.last_pulled.items(),
+                        key=lambda kv: (kv[1], kv[0]))[:k]
+        x, _ = zip(*oldest)
+        return list(x)
+
 
 #
 # Priority Queue based Frontier. A bit more polite than fifo.
@@ -70,7 +81,6 @@ class PriorityFunctor:
 class DomainPriorityFunctor(PriorityFunctor):
     def __init__(self):
         super(DomainPriorityFunctor, self).__init__()
-        pass
 
     def priority(self, domain):
         time_pulled = time.time()
@@ -152,21 +162,17 @@ class Memory_PriorityFrontier(Frontier):
         return len(self.q) == 0
 
     def k_oldest(self, k):
-        # the oldest keys will have the earliest time pulled. So
-        # sort and get the first k elements.
-        oldest = sorted(self.last_pulled.items(),
-                        key=lambda kv: (kv[1], kv[0]))[:k]
-        x, _ = zip(*oldest)
-        return list(x)
+        self.priority_functor.k_oldest(self.limit)
 
     def add(self, url):
 
         domain = uu.domain_name(url)
 
-        if self.limit and len(self.last_pulled) >= self.limit:
-            oldest_keys = self.k_oldest(int(self.limit / 2) + 1)
+        if self.limit and self.priority_functor.num_pulled() >= self.limit:
+            oldest_keys = self.priority_functor.k_oldest(
+                int(self.limit / 2) + 1)
             for key in oldest_keys:
-                del self.last_pulled[key]
+                del self.priority_functor.last_pulled[key]
 
         priority = self.priority_functor(domain)
 
