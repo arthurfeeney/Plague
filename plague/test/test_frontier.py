@@ -45,3 +45,26 @@ def test_dp_frontier_limit():
     for url in urls:
         f.add(url)
     assert list(f.priority_functor.last_pulled.keys()) == ['https://ninja.com']
+
+
+def simple_frontier_size(f):
+    assert f.size() == 0
+    assert f.empty()
+    f.add('hey')
+    f.add('there')
+    assert f.size() == 2
+    f.add('hi')
+    assert f.size() == 3
+    assert not f.empty()
+    f.get()
+    assert f.size() == 2
+    f.get()
+    f.get()
+    assert f.size() == 0
+    assert f.empty()
+
+
+def test_frontier_size():
+    simple_frontier_size(FIFOFrontier())
+    simple_frontier_size(memory_domain_priority_frontier())
+    simple_frontier_size(memory_seen_priority_frontier())

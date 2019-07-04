@@ -15,6 +15,9 @@ class Frontier(object):
     def empty(self):
         raise NotImplementedError('Frontier.empty not implemented')
 
+    def size(self):
+        raise NotImplementedError('Frontier.size not implemented')
+
     def add(self, url, **kwargs):
         raise NotImplementedError('Fronter.add not implemented')
 
@@ -39,6 +42,9 @@ class FIFOFrontier(Frontier):
 
     def empty(self):
         return self.q.empty()
+
+    def size(self):
+        return self.q.qsize()
 
     def add(self, url, **kwargs):
         self.q.put(url)
@@ -159,7 +165,10 @@ class Memory_PriorityFrontier(Frontier):
         return self.q
 
     def empty(self):
-        return len(self.q) == 0
+        return self.size() == 0
+
+    def size(self):
+        return len(self.q)
 
     def k_oldest(self, k):
         self.priority_functor.k_oldest(self.limit)

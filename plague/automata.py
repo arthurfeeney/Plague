@@ -60,7 +60,7 @@ class URLFinder():
 
     def find_quote(self, html, front):
         idx = front
-        while idx < len(html) and html[idx] != '"' and html[idx] != '\'':
+        while idx < len(html) and not (html[idx] == '"' or html[idx] == '\''):
             if html[idx] == '>':
                 # if it reachers a > before a quote, then it is probably
                 # poorly written html.

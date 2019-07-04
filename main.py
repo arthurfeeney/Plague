@@ -15,8 +15,9 @@ def main():
                                ca_certs=certifi.where())
     A = RelativeURLFinder()
     #f = MemoryDomainPriorityFrontier(limit=None)
-    f = memory_seen_priority_frontier(limit=None)
-    ust = BloomFilter(.01, 2000)
+    f = memory_seen_priority_frontier(limit=100)
+    #f = memory_domain_priority_frontier(limit=100)
+    ust = BloomFilter(.01, 5000)
     exclusion = Exclusion()
     #ust = DiskBloomFilter(.1, 10000, './',
     #                      'ust.dat')  #BloomFilter(.1, 10000)  #SetUST()
@@ -24,16 +25,13 @@ def main():
 
     G = nx.Graph()
 
-    c.crawl_count_sites(count=4000, download_path=None, graph=G)
+    c.crawl_count_sites(count=5000, download_path=None, graph=G)
 
     remove = [node for node, degree in G.degree() if degree < 2]
     G.remove_nodes_from(remove)
 
-    print('drawing graph')
-    nx.drawing.nx_pylab.draw_kamada_kawai(G,
-                                          node_size=5,
-                                          node_color='r',
-                                          alpha=0.5)
+    print('\n * Drawing Graph * \n')
+    nx.drawing.nx_pylab.draw(G, node_size=3, node_color='r', alpha=0.5)
     plt.show()
 
 

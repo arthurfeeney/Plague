@@ -112,6 +112,9 @@ class SimpleDiskUST(UST):
         return self.__contains__(item)
 
 
+#
+# Disk-based Bloom Filter.
+#
 class DiskBloomFilter(UST):
     def __init__(self, prob, n_to_insert, path, name):
         self.path = path
