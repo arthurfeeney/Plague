@@ -25,13 +25,14 @@ def main():
 
     G = nx.Graph()
 
-    c.crawl_count_sites(count=5000, download_path=None, graph=G)
+    c.crawl_count_sites(count=500, download_path=None, graph=G)
 
+    # remove nodes with 0 or 1 edges so it draws more quickly.
     remove = [node for node, degree in G.degree() if degree < 2]
     G.remove_nodes_from(remove)
 
     print('\n * Drawing Graph * \n')
-    nx.drawing.nx_pylab.draw(G, node_size=3, node_color='r', alpha=0.5)
+    nx.drawing.nx_pylab.draw(G, node_size=3, node_color='r', alpha=0.3)
     plt.show()
 
 

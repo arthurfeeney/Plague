@@ -1,5 +1,6 @@
 import socket
 import plague.url_util as uu
+import time
 
 
 class Crawler(object):
@@ -29,13 +30,11 @@ class Crawler(object):
             self.crawl(count, download_path, graph, verbose)
 
     def crawl(self, count, download_path=None, graph=None, verbose=True):
+        # crawl one webpage, optionally download, create graph and print
+        start = time.time()
+        download_start_time = time.time()
         html, current_url = self.__get_page()
-        self.num_url_crawled += 1
-        if verbose:
-            self.__verbose_output(num=self.num_url_crawled,
-                                  denom=count,
-                                  lim=50,
-                                  site=current_url[:50])
+        download_time = time.time() - download_start_time
 
         if download_path:
             self.__download_page(download_path, current_url, html)
@@ -47,18 +46,34 @@ class Crawler(object):
 
         self.add_new_urls(new_urls)
 
+        end = time.time() - start
+        self.num_url_crawled += 1
+        if verbose:
+            gap = len(str(count)) - len(str(self.num_url_crawled))
+            self.__verbose_output(num=self.num_url_crawled,
+                                  denom=count,
+                                  space=' ' * gap,
+                                  time=end,
+                                  download_time=download_time,
+                                  lim=40,
+                                  site=current_url[:40])
+
     def add_new_urls(self, new_urls):
         # insert new urls that have not been seen to the frontier
         for url in new_urls:
-            if not url in self.ust:  #and self.exclusion.test_url(url):
+            if not url in self.ust:  # and self.exclusion.test_url(url):
                 self.frontier.add(url)
                 self.ust.add(url)
 
     def __verbose_output(self, **kwargs):
-        print('Count: {num}/{denom}\t'
+        print('Count: [{num}/{denom}]{space}    '
+              'Time: [{download_time:.2f}s/{time:.2f}]\t'
               'URL[:{lim}]: {site}\t'.format(**kwargs))
 
     def __get_page(self):
+        #
+        # try downloading pages from the frontier until one is successful.
+        #
         url = self.frontier.get()
         #url = self.__dns_lookup(url)
         try:
